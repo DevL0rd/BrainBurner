@@ -174,15 +174,15 @@ def practice():
             answer = input('Answer: ')
             if answer == '0':
                 return
-            if answers[int(answer) - 1] == vWord['word']:
+            if answer and answers[int(answer) - 1] == vWord['word']:
                 vWord['streak'] += 1
                 vWord['totalCorrect'] += 1
-                print(
-                    f"{formatting['fg']['green']}Correct!{formatting['reset']}")
             else:
                 vWord['streak'] = 0
                 vWord['totalWrong'] += 1
                 print(f"{formatting['fg']['red']}Wrong!{formatting['reset']}")
+                print(f"The correct answer is '{vWord['word']}'.")
+                input("Press enter to continue...")
             vWord['lastPracticed'] = time.time()
             vWord["score"] = vWord['streak'] + \
                 vWord['totalCorrect'] - vWord['totalWrong']
