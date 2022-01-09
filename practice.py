@@ -76,15 +76,24 @@ def saveVocab(data):
 
 def sortVocab(reverse=False):
     global vocab
-    return sorted(vocab, key=lambda k: vocab[k]['score'] + vocab[k]['streak'], reverse=False)
+    return sorted(vocab, key=lambda k: vocab[k]['score'] + vocab[k]['streak'], reverse=reverse)
 
 
-def getLastNWords(n):
+def getPracticeWords(num=15):
     global vocab
-    words = []
-    for word in sortVocab(reverse=True):
-        words.append(word)
-    return words[-n:]
+    sortedVocab = sortVocab(reverse=True)
+    wordsToPractice = []
+    i = 0
+    while len(wordsToPractice) < num:
+        word = sortedVocab[i]
+        totePoints = vocab[word]['score'] + vocab[word]['streak']
+        if totePoints > 0 and totePoints < 30:
+            wordsToPractice.append(word)
+        else:
+            ammountLeft = num - len(wordsToPractice)
+            wordsToPractice.extend(sortedVocab[-ammountLeft:])
+        i += 1
+    return shuffleList(wordsToPractice)
 
 
 def shuffleList(l):
@@ -171,8 +180,8 @@ def practice():
     tWords = []
     for word in vocab:
         tWords.append(vocab[word]["word"])
-    wordsToPractice = shuffleList(getLastNWords(15))
     while True:
+        wordsToPractice = getPracticeWords(15)
         for word in wordsToPractice:
             clearScreen()
             print("********************************************")
