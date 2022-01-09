@@ -154,13 +154,16 @@ def removeWords():
 def practice():
     global vocab
     print("Practice!")
+    tWords = []
+    for word in vocab:
+        tWords.append(vocab[word]["word"])
     while True:
         clearScreen()
         wordsToPractice = shuffleList(getLastNWords(15))
         for word in wordsToPractice:
             vWord = vocab[word]
             answers = [vWord['word']]
-            answers.extend(random.sample(vocab.keys(), 3))
+            answers.extend(random.sample(tWords, 3))
             answers = shuffleList(answers)
             print(
                 f"{formatting['fg']['yellow']}{word} = ???{formatting['reset']}")
