@@ -158,15 +158,16 @@ def practice():
     for word in vocab:
         tWords.append(vocab[word]["word"])
     while True:
-        clearScreen()
         wordsToPractice = shuffleList(getLastNWords(15))
         for word in wordsToPractice:
+            clearScreen()
             vWord = vocab[word]
             answers = [vWord['word']]
             answers.extend(random.sample(tWords, 3))
             answers = shuffleList(answers)
             print(
                 f"{formatting['fg']['yellow']}{word} = ???{formatting['reset']}")
+            input("Press enter to continue...")
             for i in range(len(answers)):
                 print(
                     f"{formatting['fg']['yellow']}{i + 1} = {answers[i]}{formatting['reset']}")
