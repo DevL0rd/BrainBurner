@@ -76,7 +76,19 @@ def saveVocab(data):
 
 def sortVocab(reverse=False):
     global vocab
-    return sorted(vocab, key=lambda k: vocab[k]['score'], reverse=reverse)
+    sortedVoc = sorted(vocab, key=lambda k: adjustScoreBasedOnTime(
+        vocab[k]), reverse=reverse)
+    # for vocabWord in sortedVoc:
+    #     hoursPassed =
+    #     # Reduce the score based on hours pased
+    #     vocab[vocabWord]['score'] -= (hoursPassed * 0.3)
+    #     vocab[vocabWord]['score'] = int(vocab[vocabWord]['score'])
+    return sortedVoc
+
+
+def adjustScoreBasedOnTime(vWord):
+    return vWord['score'] - \
+        int(((time.time() - vWord['lastPracticed']) / 3600) * 0.3)
 
 
 def getPracticeWords(num=15):
@@ -86,7 +98,8 @@ def getPracticeWords(num=15):
     i = 0
     while len(wordsToPractice) < num:
         word = sortedVocab[i]
-        if vocab[word]['score'] > 0 and vocab[word]['score'] < 30:
+        adjustedScore = adjustScoreBasedOnTime(vocab[word])
+        if adjustedScore > 0 and adjustedScore < 30:
             wordsToPractice.append(word)
         else:
             ammountLeft = num - len(wordsToPractice)
@@ -118,13 +131,16 @@ def printWordList(reverse=False):
     print("********************************************")
     for word in sortVocab(reverse=reverse):
         color = formatting['fg']['blue']
-        if vocab[word]['score'] < 5:
+        adjustedScore = adjustScoreBasedOnTime(vocab[word])
+        if adjustedScore < 1:
+            color = formatting['fg']['gray']
+        elif adjustedScore < 5:
             color = formatting['fg']['red']
-        elif vocab[word]['score'] < 10:
+        elif adjustedScore < 10:
             color = formatting['fg']['yellow']
-        elif vocab[word]['score'] < 20:
+        elif adjustedScore < 20:
             color = formatting['fg']['green']
-        elif vocab[word]['score'] < 30:
+        elif adjustedScore < 30:
             color = formatting['fg']['cyan']
         text = centerText(f"{word} = {vocab[word]['word']}")
         print(f"|{color}{text}{reset}|")
