@@ -76,7 +76,7 @@ def saveVocab(data):
 
 def sortVocab(reverse=False):
     global vocab
-    return sorted(vocab, key=lambda k: vocab[k]['score'], reverse=False)
+    return sorted(vocab, key=lambda k: vocab[k]['score'] + vocab[k]['streak'], reverse=False)
 
 
 def getLastNWords(n):
@@ -94,9 +94,20 @@ def shuffleList(l):
     return l
 
 
+def centerText(text):
+    length = len(text)
+    spaceCount = int((42 - length) / 2)
+    spacing = ' ' * spaceCount
+    text = spacing + text + spacing
+    if (length % 2) != 0:
+        text += ' '
+    return text
+
+
 def printWordList(reverse=False):
     global vocab
     reset = formatting['reset']
+    print("********************************************")
     for word in sortVocab(reverse=reverse):
         color = formatting['fg']['blue']
         if vocab[word]['score'] < 5:
@@ -107,8 +118,8 @@ def printWordList(reverse=False):
             color = formatting['fg']['green']
         elif vocab[word]['score'] < 30:
             color = formatting['fg']['cyan']
-        print(
-            f"{color}{word} = {vocab[word]['word']} ({vocab[word]['score']}){reset}")
+        text = centerText(f"{word} = {vocab[word]['word']}")
+        print(f"|{color}{text}{reset}|")
 
 
 def addWords():
@@ -117,13 +128,16 @@ def addWords():
     while not shouldExit:
         clearScreen()
         printWordList()
-        print("____________________________")
-        print("Add words to your list, to stop adding words, enter '0'.")
-        word = input('English:')
+        print("|------------------------------------------|")
+        print("|          Add words to the list.          |")
+        print("|------------------------------------------|")
+        print("|                 0. Exit.                 |")
+        print("********************************************")
+        word = input('English: ')
         if word == '0':
             shouldExit = True
         else:
-            tWord = input('Thai: ')
+            tWord = input(f'{word} = ')
             vocab[word] = {
                 'word': tWord,
                 'streak': 0,
@@ -139,9 +153,12 @@ def removeWords():
     while not shouldExit:
         clearScreen()
         printWordList()
-        print("____________________________")
-        print("Remove words from your list, to stop removing words, enter '0'.")
-        word = input('Remove Word:')
+        print("|------------------------------------------|")
+        print("|       Remove words from the list.        |")
+        print("|------------------------------------------|")
+        print("|                 0. Exit.                 |")
+        print("********************************************")
+        word = input('Remove: ')
         if word == '0':
             shouldExit = True
         else:
@@ -151,7 +168,6 @@ def removeWords():
 
 def practice():
     global vocab
-    print("Practice!")
     tWords = []
     for word in vocab:
         tWords.append(vocab[word]["word"])
@@ -159,16 +175,28 @@ def practice():
     while True:
         for word in wordsToPractice:
             clearScreen()
+            print("********************************************")
+            print("|              Practice Mode.              |")
+            print("|------------------------------------------|")
+            print("|                 0. Exit.                 |")
+            print("|------------------------------------------|")
             vWord = vocab[word]
             answers = [vWord['word']]
             answers.extend(random.sample(tWords, 3))
             answers = shuffleList(answers)
+            centeredWord = centerText(word)
+            print("|                                          |")
             print(
-                f"{formatting['fg']['yellow']}{word} = ???{formatting['reset']}")
-            input("Press enter to continue...")
+                f"|{formatting['bold']}{formatting['fg']['purple']}{centeredWord}{formatting['reset']}|")
+            print("|                                          |")
+            print("********************************************")
+            input()
+            print("********************************************")
             for i in range(len(answers)):
+                centeredAnswer = centerText(f"{i + 1} = {answers[i]}")
                 print(
-                    f"{formatting['fg']['yellow']}{i + 1} = {answers[i]}{formatting['reset']}")
+                    f"|{formatting['fg']['white']}{formatting['bold']}{centeredAnswer}{formatting['reset']}|")
+            print("********************************************")
             answer = input('Answer: ')
             if answer == '0':
                 return
@@ -181,8 +209,8 @@ def practice():
                 if vWord['score'] < 0:
                     vWord['score'] = 0
                 print(f"{formatting['fg']['red']}Wrong!{formatting['reset']}")
-                print(f"The correct answer is '{vWord['word']}'.")
-                input("Press enter to continue...")
+                print(f"{formatting['fg']['red']}The word for {formatting['fg']['white']}{formatting['bold']}'{word}'{formatting['reset']}{formatting['fg']['red']} is {formatting['fg']['white']}{formatting['bold']}'{vWord['word']}'{formatting['fg']['red']}.{formatting['reset']}")
+                input()
             vWord['lastPracticed'] = time.time()
             saveVocab(vocab)
 
@@ -198,28 +226,23 @@ def resetStats():
 
 def mainMenu():
     clearScreen()
-    print("Let's burn some vocab into your brain!")
-    print("1. Word list.")
-    print("2. Add words.")
-    print("3. Remove words.")
-    print("4. Practice.")
-    print("5. Reset stats.")
-    print("\n")
-    print("0. Exit.")
-    print("\n")
-    print("Please enter your choice: ", end='')
-    choice = input()
+    printWordList()
+    print("|------------------------------------------|")
+    print("|  Let's burn some vocab into your brain!  |")
+    print("|------------------------------------------|")
+    print("| 1. Add words.            3. Practice.    |")
+    print("| 2. Remove words.         4. Reset stats. |")
+    print("|                                          |")
+    print("|                 0. Exit.                 |")
+    print("********************************************")
+    choice = input(":")
     if choice == '1':
-        clearScreen()
-        printWordList()
-        input('Press enter to continue...')
-    elif choice == '2':
         addWords()
-    elif choice == '3':
+    elif choice == '2':
         removeWords()
-    elif choice == '4':
+    elif choice == '3':
         practice()
-    elif choice == '5':
+    elif choice == '4':
         resetStats()
     elif choice == '0':
         exit()
