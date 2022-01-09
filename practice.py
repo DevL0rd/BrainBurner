@@ -128,8 +128,6 @@ def addWords():
                 'word': tWord,
                 'streak': 0,
                 'lastPracticed': 0,
-                'totalCorrect': 0,
-                'totalWrong': 0,
                 'score': 0
             }
             saveVocab(vocab)
@@ -176,16 +174,16 @@ def practice():
                 return
             if answer and answers[int(answer) - 1] == vWord['word']:
                 vWord['streak'] += 1
-                vWord['totalCorrect'] += 1
+                vWord['score'] += 1
             else:
                 vWord['streak'] = 0
-                vWord['totalWrong'] += 1
+                vWord['score'] -= 1
+                if vWord['score'] < 0:
+                    vWord['score'] = 0
                 print(f"{formatting['fg']['red']}Wrong!{formatting['reset']}")
                 print(f"The correct answer is '{vWord['word']}'.")
                 input("Press enter to continue...")
             vWord['lastPracticed'] = time.time()
-            vWord["score"] = vWord['streak'] + \
-                vWord['totalCorrect'] - vWord['totalWrong']
             saveVocab(vocab)
 
 
@@ -193,8 +191,6 @@ def resetStats():
     global vocab
     for word in vocab:
         vocab[word]['streak'] = 0
-        vocab[word]['totalCorrect'] = 0
-        vocab[word]['totalWrong'] = 0
         vocab[word]['score'] = 0
         vocab[word]['lastPracticed'] = 0
     saveVocab(vocab)
