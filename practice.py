@@ -76,7 +76,7 @@ def saveVocab(data):
 
 def sortVocab(reverse=False):
     global vocab
-    return sorted(vocab, key=lambda k: vocab[k]['score'] + vocab[k]['streak'], reverse=reverse)
+    return sorted(vocab, key=lambda k: vocab[k]['score'], reverse=reverse)
 
 
 def getPracticeWords(num=15):
@@ -86,8 +86,7 @@ def getPracticeWords(num=15):
     i = 0
     while len(wordsToPractice) < num:
         word = sortedVocab[i]
-        totePoints = vocab[word]['score'] + vocab[word]['streak']
-        if totePoints > 0 and totePoints < 30:
+        if vocab[word]['score'] > 0 and vocab[word]['score'] < 30:
             wordsToPractice.append(word)
         else:
             ammountLeft = num - len(wordsToPractice)
@@ -214,9 +213,8 @@ def practice():
                 vWord['score'] += 1
             else:
                 vWord['streak'] = 0
-                vWord['score'] -= 1
-                if vWord['score'] < 0:
-                    vWord['score'] = 0
+                vWord['score'] *= 0.7
+                vWord['score'] = int(vWord['score'])
                 print(f"{formatting['fg']['red']}Wrong!{formatting['reset']}")
                 print(f"{formatting['fg']['red']}The word for {formatting['fg']['white']}{formatting['bold']}'{word}'{formatting['reset']}{formatting['fg']['red']} is {formatting['fg']['white']}{formatting['bold']}'{vWord['word']}'{formatting['fg']['red']}.{formatting['reset']}")
                 input()
