@@ -125,24 +125,29 @@ def centerText(text):
     return text
 
 
+def getScoredColor(vocabWord):
+    color = formatting['fg']['blue']
+    adjustedScore = adjustScoreBasedOnTime(vocabWord)
+    if adjustedScore < 1:
+        color = formatting['fg']['gray']
+    elif adjustedScore < 5:
+        color = formatting['fg']['red']
+    elif adjustedScore < 10:
+        color = formatting['fg']['yellow']
+    elif adjustedScore < 20:
+        color = formatting['fg']['green']
+    elif adjustedScore < 30:
+        color = formatting['fg']['cyan']
+    return color
+
+
 def printWordList(reverse=False):
     global vocab
     reset = formatting['reset']
     print("********************************************")
     for word in sortVocab(reverse=reverse):
-        color = formatting['fg']['blue']
-        adjustedScore = adjustScoreBasedOnTime(vocab[word])
-        if adjustedScore < 1:
-            color = formatting['fg']['gray']
-        elif adjustedScore < 5:
-            color = formatting['fg']['red']
-        elif adjustedScore < 10:
-            color = formatting['fg']['yellow']
-        elif adjustedScore < 20:
-            color = formatting['fg']['green']
-        elif adjustedScore < 30:
-            color = formatting['fg']['cyan']
         text = centerText(f"{word} = {vocab[word]['word']}")
+        color = getScoredColor(vocab[word])
         print(f"|{color}{text}{reset}|")
 
 
@@ -157,7 +162,7 @@ def addWords():
         print("|------------------------------------------|")
         print("|                 0. Exit.                 |")
         print("********************************************")
-        word = input('English: ')
+        word = input(': ')
         if word == '0':
             shouldExit = True
         else:
@@ -182,7 +187,7 @@ def removeWords():
         print("|------------------------------------------|")
         print("|                 0. Exit.                 |")
         print("********************************************")
-        word = input('Remove: ')
+        word = input(': ')
         if word == '0':
             shouldExit = True
         else:
@@ -199,32 +204,69 @@ def practice():
         wordsToPractice = getPracticeWords(15)
         for word in wordsToPractice:
             clearScreen()
+            vWord = vocab[word]
             print("********************************************")
             print("|              Practice Mode.              |")
             print("|------------------------------------------|")
+            game = random.choice(["multiple choice", "true/false"])
+            if game == "true/false":
+                print("| 1. True                         2. False |")
+                print("|                                          |")
+
             print("|                 0. Exit.                 |")
             print("|------------------------------------------|")
-            vWord = vocab[word]
-            answers = [vWord['word']]
-            answers.extend(random.sample(tWords, 3))
-            answers = shuffleList(answers)
+            print("|                                          |")
             centeredWord = centerText(word)
-            print("|                                          |")
+            color = getScoredColor(vocab[word])
             print(
-                f"|{formatting['bold']}{formatting['fg']['purple']}{centeredWord}{formatting['reset']}|")
+                f"|{formatting['bold']}{color}{centeredWord}{formatting['reset']}|")
             print("|                                          |")
             print("********************************************")
-            input()
+            adjustedScore = adjustScoreBasedOnTime(vocab[word])
+            if adjustedScore >= 5:
+                poop = input()
+                if poop == '0':
+                    return
+            else:
+                print("")
             print("********************************************")
-            for i in range(len(answers)):
-                centeredAnswer = centerText(f"{i + 1} = {answers[i]}")
+            tf_correctChoice = "1"
+            if game == "multiple choice":
+                answers = [vWord['word']]
+                answers.extend(random.sample(tWords, 3))
+                answers = shuffleList(answers)
+                for i in range(len(answers)):
+                    centeredAnswer = centerText(f"{i + 1} = {answers[i]}")
+                    print(
+                        f"|{formatting['fg']['white']}{formatting['bold']}{centeredAnswer}{formatting['reset']}|")
+            elif game == "true/false":
+                tf_correctChoice = random.choice(["1", "2"])
+                centeredAnswer = ""
+                if tf_correctChoice == "1":
+                    centeredAnswer = centerText(f"{word} = {vWord['word']}")
+                else:
+                    while True:
+                        tWord = random.choice(tWords)
+                        if tWord != vWord['word']:
+                            centeredAnswer = centerText(
+                                f"{word} = {tWord}")
+                            break
                 print(
                     f"|{formatting['fg']['white']}{formatting['bold']}{centeredAnswer}{formatting['reset']}|")
+
             print("********************************************")
-            answer = input('Answer: ')
+            answer = input(': ')
             if answer == '0':
                 return
-            if answer and answers[int(answer) - 1] == vWord['word']:
+
+            isGoodAnswer = False
+            if game == "multiple choice":
+                isGoodAnswer = answer and answers[int(
+                    answer) - 1] == vWord['word']
+            elif game == "true/false":
+                isGoodAnswer = answer == tf_correctChoice
+
+            if isGoodAnswer:
                 vWord['streak'] += 1
                 vWord['score'] += 1
             else:
