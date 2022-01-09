@@ -157,8 +157,8 @@ def practice():
     tWords = []
     for word in vocab:
         tWords.append(vocab[word]["word"])
+    wordsToPractice = shuffleList(getLastNWords(15))
     while True:
-        wordsToPractice = shuffleList(getLastNWords(15))
         for word in wordsToPractice:
             clearScreen()
             vWord = vocab[word]
