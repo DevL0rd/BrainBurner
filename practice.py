@@ -418,6 +418,7 @@ def settignsMenu():
     global settings
     while True:
         clearScreen()
+        printBorder()
         printCentered("Settings")
         printLineSeperator()
         printCentered(f"1. Practice Mode ({settings['practiceMode']})")
@@ -432,7 +433,6 @@ def settignsMenu():
         printCentered(f"10. Seperator Color ({settings['seperatorColor']})")
         printCentered(f"11. Screen Width ({settings['screenWidth']})")
         printCentered("0. Exit")
-        printLineSeperator()
         printBorder()
         choice = input(': ')
         if choice == '0':
