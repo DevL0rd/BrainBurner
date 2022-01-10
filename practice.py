@@ -77,8 +77,8 @@ def loadSettings():
         print('Settings not found. Creating new one...')
         settings = {
             "timeDecayRatio": 0.3,
-            "screenWidth": 46,
-            "numPracticeWords": 10,
+            "screenWidth": 65,
+            "numPracticeWords": 8,
             "maxScore": 20,
             "practiceMode": "random",
             "bgColor": "black",
