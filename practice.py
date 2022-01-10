@@ -45,10 +45,6 @@ formatting = {
 }
 
 
-def clearScreen():
-    os.system('cls' if os.name == 'nt' else 'clear')
-
-
 def loadJson(file):
     with open(file) as f:
         data = json.load(f)
@@ -61,51 +57,159 @@ def saveJson(data, file):
 
 
 def loadVocab():
+    global vocab
     if not os.path.exists('vocab.json'):
         print('Vocabulary not found. Creating new one...')
         vocab = {}
         saveJson(vocab, 'vocab.json')
     else:
         vocab = loadJson('vocab.json')
-    return vocab
 
 
-def saveVocab(data):
-    saveJson(data, 'vocab.json')
+def saveVocab():
+    global vocab
+    saveJson(vocab, 'vocab.json')
+
+
+def loadSettings():
+    global settings
+    if not os.path.exists('settings.json'):
+        print('Settings not found. Creating new one...')
+        settings = {
+            "timeDecayRatio": 0.3,
+            "screenWidth": 46,
+            "numPracticeWords": 10,
+            "maxScore": 20,
+            "practiceMode": "random",
+            "bgColor": "black",
+            "fgColor": "white",
+            "borderColor": "blue",
+            "seperatorColor": "darkBlue"
+        }
+        saveSettings()
+    else:
+        settings = loadJson('settings.json')
+
+
+def saveSettings():
+    global settings
+    saveJson(settings, 'settings.json')
+
+
+def clearScreen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+def printBorder():
+    global settings
+    text = "#" * settings["screenWidth"]
+    text = formatting['fg'][settings['borderColor']] + \
+        formatting['bg'][settings['bgColor']] + text + formatting['reset']
+    print(text)
+
+
+def printLineSeperator():
+    global settings
+    text = '-' * (settings["screenWidth"] - 2)
+    text = formatting['fg'][settings['borderColor']] + formatting['bg'][settings['bgColor']] + "|" + formatting['fg'][settings['seperatorColor']
+                                                                                                                      ] + formatting['bg'][settings['bgColor']] + text + formatting['fg'][settings['borderColor']] + "|" + formatting['reset']
+    print(text)
+
+
+def printSpaceSeperator():
+    global settings
+    text = ' ' * (settings["screenWidth"] - 2)
+    text = formatting['fg'][settings['borderColor']] + \
+        formatting['bg'][settings['bgColor']] + \
+        "|" + text + "|" + formatting['reset']
+    print(text)
+
+
+# Removes formmating strings and returns length
+def measureTextLength(text):
+    textCopy = text[:]
+    for key in formatting:
+        if type(formatting[key]) == str:
+            textCopy = textCopy.replace(formatting[key], '')
+        elif type(formatting[key]) == dict:
+            for k in formatting[key]:
+                textCopy = textCopy.replace(formatting[key][k], '')
+    return len(textCopy)
+
+
+def printCentered(text):
+    global settings
+    length = measureTextLength(text)
+    spaceCount = int((settings["screenWidth"] - length - 2) / 2)
+    spacing = " " * spaceCount
+    text = formatting['fg'][settings['borderColor']] + formatting['bg'][settings['bgColor']] + "|" + formatting['fg'][settings['fgColor']] + formatting['bg'][settings['bgColor']
+                                                                                                                                                              ] + spacing + text + formatting['reset'] + formatting["bg"][settings["bgColor"]] + spacing
+    if measureTextLength(text) != settings["screenWidth"] - 1:
+        text += ' '
+    text = text + formatting['fg'][settings['borderColor']] + \
+        formatting['bg'][settings['bgColor']] + "|" + formatting['reset']
+    print(text)
+
+
+def printCol_2(col1, col2):
+    global settings
+    length = measureTextLength(col1) + measureTextLength(col2)
+    spaceCount = (settings["screenWidth"] - length - 4)
+    spacing = " " * spaceCount
+    text = formatting['fg'][settings['borderColor']] + formatting['bg'][settings['bgColor']] + "| " + formatting['fg'][settings['fgColor']] + formatting['bg'][settings['bgColor']] + col1 + formatting['fg'][settings['fgColor']] + formatting['bg'][settings['bgColor']
+                                                                                                                                                                                                                                                      ] + spacing + formatting['fg'][settings['fgColor']] + formatting['bg'][settings['bgColor']] + col2 + formatting['reset'] + formatting['fg'][settings['borderColor']] + formatting['bg'][settings['bgColor']] + " |" + formatting['reset']
+    print(text)
+
+
+def printLeft(text):
+    printCol_2(text, "")
+
+
+def printRight(text):
+    printCol_2("", text)
+
+
+def printWordList(reverse=False):
+    global vocab
+    global settings
+    printBorder()
+    for word in sortVocab(reverse=reverse):
+        color = getScoredColor(vocab[word]) + \
+            formatting['bg'][settings['bgColor']]
+        printCentered(f"{color}{word} = {vocab[word]['word']}")
+
+
+def adjustScoreBasedOnTime(vWord):
+    global settings
+    nScore = vWord['score'] - \
+        int(((time.time() - vWord['lastPracticed']) /
+            3600) * settings["timeDecayRatio"])
+    if nScore < 0:
+        nScore = 0
+    return nScore
+
+
+def getScoredColor(vocabWord):
+    global settings
+    color = formatting['fg']['blue']
+    adjustedScore = adjustScoreBasedOnTime(vocabWord)
+    sectionLength = int(settings["maxScore"] / 4)
+    if adjustedScore < 1:
+        color = formatting['fg']['gray']
+    elif adjustedScore < sectionLength:
+        color = formatting['fg']['red']
+    elif adjustedScore < sectionLength * 2:
+        color = formatting['fg']['yellow']
+    elif adjustedScore < sectionLength * 3:
+        color = formatting['fg']['green']
+    elif adjustedScore < sectionLength * 4:
+        color = formatting['fg']['cyan']
+    return color
 
 
 def sortVocab(reverse=False):
     global vocab
-    sortedVoc = sorted(vocab, key=lambda k: adjustScoreBasedOnTime(
-        vocab[k]), reverse=reverse)
-    # for vocabWord in sortedVoc:
-    #     hoursPassed =
-    #     # Reduce the score based on hours pased
-    #     vocab[vocabWord]['score'] -= (hoursPassed * 0.3)
-    #     vocab[vocabWord]['score'] = int(vocab[vocabWord]['score'])
-    return sortedVoc
-
-
-def adjustScoreBasedOnTime(vWord):
-    return vWord['score'] - \
-        int(((time.time() - vWord['lastPracticed']) / 3600) * 0.3)
-
-
-def getPracticeWords(num=15):
-    global vocab
-    sortedVocab = sortVocab(reverse=True)
-    wordsToPractice = []
-    i = 0
-    while len(wordsToPractice) < num:
-        word = sortedVocab[i]
-        adjustedScore = adjustScoreBasedOnTime(vocab[word])
-        if adjustedScore > 0 and adjustedScore < 30:
-            wordsToPractice.append(word)
-        else:
-            ammountLeft = num - len(wordsToPractice)
-            wordsToPractice.extend(sortedVocab[-ammountLeft:])
-        i += 1
-    return shuffleList(wordsToPractice)
+    return sorted(vocab, key=lambda k: adjustScoreBasedOnTime(vocab[k]), reverse=reverse)
 
 
 def shuffleList(l):
@@ -115,40 +219,22 @@ def shuffleList(l):
     return l
 
 
-def centerText(text):
-    length = len(text)
-    spaceCount = int((42 - length) / 2)
-    spacing = ' ' * spaceCount
-    text = spacing + text + spacing
-    if (length % 2) != 0:
-        text += ' '
-    return text
-
-
-def getScoredColor(vocabWord):
-    color = formatting['fg']['blue']
-    adjustedScore = adjustScoreBasedOnTime(vocabWord)
-    if adjustedScore < 1:
-        color = formatting['fg']['gray']
-    elif adjustedScore < 5:
-        color = formatting['fg']['red']
-    elif adjustedScore < 10:
-        color = formatting['fg']['yellow']
-    elif adjustedScore < 20:
-        color = formatting['fg']['green']
-    elif adjustedScore < 30:
-        color = formatting['fg']['cyan']
-    return color
-
-
-def printWordList(reverse=False):
+def getPracticeWords(num=15):
     global vocab
-    reset = formatting['reset']
-    print("********************************************")
-    for word in sortVocab(reverse=reverse):
-        text = centerText(f"{word} = {vocab[word]['word']}")
-        color = getScoredColor(vocab[word])
-        print(f"|{color}{text}{reset}|")
+    global settings
+    sortedVocab = sortVocab(reverse=True)
+    wordsToPractice = []
+    i = 0
+    while len(wordsToPractice) < num:
+        word = sortedVocab[i]
+        adjustedScore = adjustScoreBasedOnTime(vocab[word])
+        if adjustedScore > 0 and adjustedScore < settings["maxScore"]:
+            wordsToPractice.append(word)
+        else:
+            ammountLeft = num - len(wordsToPractice)
+            wordsToPractice.extend(sortedVocab[-ammountLeft:])
+        i += 1
+    return shuffleList(wordsToPractice)
 
 
 def addWords():
@@ -157,11 +243,11 @@ def addWords():
     while not shouldExit:
         clearScreen()
         printWordList()
-        print("|------------------------------------------|")
-        print("|          Add words to the list.          |")
-        print("|------------------------------------------|")
-        print("|                 0. Exit.                 |")
-        print("********************************************")
+        printLineSeperator()
+        printCentered("Add words to the list.")
+        printLineSeperator()
+        printCentered("0. Exit.")
+        printBorder()
         word = input(': ')
         if word == '0':
             shouldExit = True
@@ -170,10 +256,10 @@ def addWords():
             vocab[word] = {
                 'word': tWord,
                 'streak': 0,
-                'lastPracticed': 0,
+                'lastPracticed': time.time(),
                 'score': 0
             }
-            saveVocab(vocab)
+            saveVocab()
 
 
 def removeWords():
@@ -182,79 +268,85 @@ def removeWords():
     while not shouldExit:
         clearScreen()
         printWordList()
-        print("|------------------------------------------|")
-        print("|       Remove words from the list.        |")
-        print("|------------------------------------------|")
-        print("|                 0. Exit.                 |")
-        print("********************************************")
+        printLineSeperator()
+        printCentered("Remove words from the list.")
+        printLineSeperator()
+        printCentered("0. Exit.")
+        printBorder()
         word = input(': ')
         if word == '0':
             shouldExit = True
         else:
             del vocab[word]
-            saveVocab(vocab)
+            saveVocab()
 
 
 def practice():
     global vocab
-    tWords = []
-    for word in vocab:
-        tWords.append(vocab[word]["word"])
+    global settings
+    tWords = [vocab[word]["word"] for word in vocab]
     while True:
-        wordsToPractice = getPracticeWords(15)
+        wordsToPractice = getPracticeWords(settings["numPracticeWords"])
         for word in wordsToPractice:
             clearScreen()
             vWord = vocab[word]
-            print("********************************************")
-            print("|              Practice Mode.              |")
-            print("|------------------------------------------|")
-            game = random.choice(["multiple choice", "true/false"])
-            if game == "true/false":
-                print("| 1. True                         2. False |")
-                print("|                                          |")
+            printBorder()
+            if settings["practiceMode"] == "random":
+                game = random.choice(["multiple choice", "true/false"])
+            else:
+                game = settings["practiceMode"]
+            if game == "multiple choice":
+                printCentered("Multiple Choice")
+                printLineSeperator()
+            elif game == "true/false":
+                printCentered("True/False")
+                printLineSeperator()
+                printCol_2("1. True", "2. False")
+                printSpaceSeperator()
+            printCentered("0. Exit.")
+            printLineSeperator()
+            printSpaceSeperator()
+            color = getScoredColor(vocab[word]) + \
+                formatting['bg'][settings['bgColor']]
+            printCentered(
+                f"{formatting['bold']}{color}{word}{formatting['reset']}")
+            printSpaceSeperator()
+            printBorder()
 
-            print("|                 0. Exit.                 |")
-            print("|------------------------------------------|")
-            print("|                                          |")
-            centeredWord = centerText(word)
-            color = getScoredColor(vocab[word])
-            print(
-                f"|{formatting['bold']}{color}{centeredWord}{formatting['reset']}|")
-            print("|                                          |")
-            print("********************************************")
+            # Wait for input if the word is not new, so we don't give hints.
             adjustedScore = adjustScoreBasedOnTime(vocab[word])
-            if adjustedScore >= 5:
+            newWordScore = int(settings["maxScore"] / 4)
+            if adjustedScore >= newWordScore:
                 poop = input()
                 if poop == '0':
                     return
             else:
                 print("")
-            print("********************************************")
+
+            printBorder()
             tf_correctChoice = "1"
             if game == "multiple choice":
                 answers = [vWord['word']]
                 answers.extend(random.sample(tWords, 3))
                 answers = shuffleList(answers)
                 for i in range(len(answers)):
-                    centeredAnswer = centerText(f"{i + 1} = {answers[i]}")
-                    print(
-                        f"|{formatting['fg']['white']}{formatting['bold']}{centeredAnswer}{formatting['reset']}|")
+                    printCentered(
+                        f"{formatting['fg']['white']}{formatting['bold']}{i + 1} = {answers[i]}{formatting['reset']}")
             elif game == "true/false":
                 tf_correctChoice = random.choice(["1", "2"])
-                centeredAnswer = ""
+                text = ""
                 if tf_correctChoice == "1":
-                    centeredAnswer = centerText(f"{word} = {vWord['word']}")
+                    text = f"{word} = {vWord['word']}"
                 else:
                     while True:
                         tWord = random.choice(tWords)
                         if tWord != vWord['word']:
-                            centeredAnswer = centerText(
-                                f"{word} = {tWord}")
+                            text = f"{word} = {tWord}"
                             break
-                print(
-                    f"|{formatting['fg']['white']}{formatting['bold']}{centeredAnswer}{formatting['reset']}|")
+                printCentered(
+                    f"{formatting['fg']['white']}{formatting['bold']}{text}{formatting['reset']}")
 
-            print("********************************************")
+            printBorder()
             answer = input(': ')
             if answer == '0':
                 return
@@ -265,6 +357,14 @@ def practice():
                     answer) - 1] == vWord['word']
             elif game == "true/false":
                 isGoodAnswer = answer == tf_correctChoice
+                if isGoodAnswer and tf_correctChoice == "2":
+                    clearScreen()
+                    printBorder()
+                    printCentered(
+                        f"{formatting['fg']['green']}Correct!{formatting['reset']}")
+                    printCentered(f"The real word for {formatting['fg']['white']}{formatting['bg'][settings['bgColor']]}{formatting['bold']}'{word}'{formatting['reset']}{formatting['fg'][settings['fgColor']]}{formatting['bg'][settings['bgColor']]} is {formatting['fg']['white']}{formatting['bg'][settings['bgColor']]}{formatting['bold']}'{vWord['word']}'{formatting['reset']}{formatting['fg'][settings['fgColor']]}{formatting['bg'][settings['bgColor']]}.")
+                    printBorder()
+                    input()
 
             if isGoodAnswer:
                 vWord['streak'] += 1
@@ -273,11 +373,16 @@ def practice():
                 vWord['streak'] = 0
                 vWord['score'] *= 0.7
                 vWord['score'] = int(vWord['score'])
-                print(f"{formatting['fg']['red']}Wrong!{formatting['reset']}")
-                print(f"{formatting['fg']['red']}The word for {formatting['fg']['white']}{formatting['bold']}'{word}'{formatting['reset']}{formatting['fg']['red']} is {formatting['fg']['white']}{formatting['bold']}'{vWord['word']}'{formatting['fg']['red']}.{formatting['reset']}")
+                clearScreen()
+                printBorder()
+                printCentered(
+                    f"{formatting['fg']['red']}Wrong!{formatting['reset']}")
+                printCentered(f"{formatting['fg']['red']}The word for {formatting['fg']['white']}{formatting['bold']}'{word}'{formatting['reset']}{formatting['fg']['red']}{formatting['bg'][settings['bgColor']]} is {formatting['fg']['white']}{formatting['bold']}'{vWord['word']}'{formatting['fg']['red']}.{formatting['reset']}")
+                printBorder()
                 input()
+            vWord["score"] = adjustScoreBasedOnTime(vWord)
             vWord['lastPracticed'] = time.time()
-            saveVocab(vocab)
+            saveVocab()
 
 
 def resetStats():
@@ -285,43 +390,41 @@ def resetStats():
     for word in vocab:
         vocab[word]['streak'] = 0
         vocab[word]['score'] = 0
-        vocab[word]['lastPracticed'] = 0
-    saveVocab(vocab)
+        vocab[word]['lastPracticed'] = time.time()
+    saveVocab()
 
 
-def mainMenu():
-    clearScreen()
-    printWordList()
-    print("|------------------------------------------|")
-    print("|  Let's burn some vocab into your brain!  |")
-    print("|------------------------------------------|")
-    print("| 1. Add words.            3. Practice.    |")
-    print("| 2. Remove words.         4. Reset stats. |")
-    print("|                                          |")
-    print("|                 0. Exit.                 |")
-    print("********************************************")
-    choice = input(":")
-    if choice == '1':
-        addWords()
-    elif choice == '2':
-        removeWords()
-    elif choice == '3':
-        practice()
-    elif choice == '4':
-        resetStats()
-    elif choice == '0':
-        exit()
-    else:
-        print("Invalid choice.")
-        time.sleep(2)
-        mainMenu()
+def load():
+    loadSettings()
+    loadVocab()
 
 
 def main():
-    global vocab
-    vocab = loadVocab()
+    load()
     while True:
-        mainMenu()
+        clearScreen()
+        printWordList()
+        printLineSeperator()
+        printCentered("Let's burn some vocab into your brain!")
+        printLineSeperator()
+        printCol_2("1. Add words.", "3. Practice.")
+        printCol_2("2. Remove words.", "4. Reset stats.")
+        printSpaceSeperator()
+        printCentered("0. Exit.")
+        printBorder()
+        choice = input(":")
+        if choice == '1':
+            addWords()
+        elif choice == '2':
+            removeWords()
+        elif choice == '3':
+            practice()
+        elif choice == '4':
+            resetStats()
+        elif choice == '0':
+            exit()
+        else:
+            print("Invalid choice.")
 
 
 main()
