@@ -64,10 +64,6 @@ def loadVocab():
         saveJson(vocab, 'vocab.json')
     else:
         vocab = loadJson('vocab.json')
-    # Clean up vocab storage, Remove me later
-    for word in vocab:
-        if 'isFavorite' not in vocab[word]:
-            vocab[word]['isFavorite'] = False
     saveVocab()
 
 
