@@ -254,15 +254,15 @@ def getPracticeWords(num=15):
     sortedVocab = sortVocab(reverse=True)
     wordsToPractice = []
     i = 0
-    while len(wordsToPractice) < num:
+    while len(wordsToPractice) < num and i < len(sortedVocab):
         word = sortedVocab[i]
         adjustedScore = adjustScoreBasedOnTime(vocab[word])
         if adjustedScore > 0 and adjustedScore < settings["maxScore"]:
             wordsToPractice.append(word)
-        else:
-            ammountLeft = num - len(wordsToPractice)
-            wordsToPractice.extend(sortedVocab[-ammountLeft:])
         i += 1
+    ammountLeft = num - len(wordsToPractice)
+    if ammountLeft:
+        wordsToPractice.extend(sortedVocab[-ammountLeft:])
     return shuffleList(wordsToPractice)
 
 
