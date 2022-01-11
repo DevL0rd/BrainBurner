@@ -74,11 +74,11 @@ def saveVocab():
 
 def loadSettings():
     global settings
-    settingsVersion = 2
+    settingVersion = 2
     if not os.path.exists('settings.json'):
         print('Settings not found. Creating new one...')
         settings = {
-            "settingVersion": settingsVersion,
+            "settingVersion": settingVersion,
             "timeDecayRatio": 0.3,
             "screenWidth": 65,
             "numPracticeWords": 8,
@@ -96,7 +96,7 @@ def loadSettings():
         # saveSettings()
     else:
         settings = loadJson('settings.json')
-        if 'settingVersion' not in settings or settings['settingVersion'] != settingsVersion:
+        if 'settingVersion' not in settings or settings['settingVersion'] != settingVersion:
             os.remove('settings.json')
             loadSettings()
 
@@ -196,9 +196,14 @@ def printWordList(showTranslations=True, selectLine=-1, reverse=False):
         text = f"{color}{word}"
         if showTranslations:
             text = f"{text} = {vocab[word]['word']}"
+
         if settings['showScore']:
             adjustedScore = adjustScoreBasedOnTime(vocab[word])
             text = f"{text}{formatting['reset']}{fg}{bg} ({adjustedScore})"
+
+        if vocab[word]['isFavorite']:
+            text = f"{formatting['fg']['yellow']}{bg}★ {text} {formatting['fg']['yellow']}{bg}★"
+
         printCentered(text)
         i += 1
 
@@ -301,7 +306,7 @@ def editWords():
         printCentered("Press enter to select a word.")
         printSpaceSeperator()
         printCol_2("1. Edit word", "2. Edit translation")
-        printCol_2("3. Remove word", "")
+        printCol_2("3. Toggle Favorite", "4. Remove word")
         printSpaceSeperator()
         printCentered("0. Exit")
         printBorder()
@@ -324,6 +329,11 @@ def editWords():
             saveVocab()
             sortedVocab = sortVocab()
         elif opt == '3':
+            vocab[sortedVocab[selectLine]
+                  ]['isFavorite'] = not vocab[sortedVocab[selectLine]]['isFavorite']
+            saveVocab()
+            sortedVocab = sortVocab()
+        elif opt == '4':
             del vocab[sortedVocab[selectLine]]
             saveVocab()
             sortedVocab = sortVocab()
@@ -418,8 +428,7 @@ def practice():
                 if isGoodAnswer and tf_correctChoice == "2":
                     clearScreen()
                     printBorder()
-                    printCentered(
-                        f"{formatting['fg']['green']}Correct!")
+                    printCentered(f"{formatting['fg']['green']}Correct!")
                     printCentered(f"The real word for {formatting['fg']['white']}{formatting['bg'][settings['bgColor']]}{formatting['bold']}'{word}'{formatting['reset']}{formatting['fg'][settings['fgColor']]}{formatting['bg'][settings['bgColor']]} is {formatting['fg']['white']}{formatting['bg'][settings['bgColor']]}{formatting['bold']}'{vWord['word']}'{formatting['reset']}{formatting['fg'][settings['fgColor']]}{formatting['bg'][settings['bgColor']]}.")
                     printBorder()
                     input()
@@ -654,7 +663,7 @@ def main():
         printLineSeperator()
         printCol_2("1. Add words", "2. Edit List")
         printCol_2("3. Practice", "4. Toggle Translation")
-        printCol_2("5. Settings", "0. Reset Stats")
+        printCol_2("5. Settings", "")
         printSpaceSeperator()
         printCentered("0. Exit.")
         printBorder()
