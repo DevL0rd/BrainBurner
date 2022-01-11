@@ -68,9 +68,6 @@ def loadVocab():
     for word in vocab:
         if 'isFavorite' not in vocab[word]:
             vocab[word]['isFavorite'] = False
-        for key in vocab[word]:
-            if key not in ["word", "streak", "lastPracticed", "score", "isFavorite"]:
-                del vocab[word][key]
     saveVocab()
 
 
