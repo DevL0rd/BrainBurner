@@ -248,7 +248,7 @@ def shuffleList(l):
     return l
 
 
-def getPracticeWords(num=15):
+def getPracticeWords(num):
     global vocab
     global settings
     sortedVocab = sortVocab(reverse=True)
@@ -263,7 +263,7 @@ def getPracticeWords(num=15):
     ammountLeft = num - len(wordsToPractice)
     if ammountLeft:
         wordsToPractice.extend(sortedVocab[-ammountLeft:])
-    return shuffleList(wordsToPractice)
+    return wordsToPractice
 
 
 def addWords():
@@ -351,22 +351,42 @@ def practice():
     tWords = [vocab[word]["word"] for word in vocab]
     while True:
         wordsToPractice = getPracticeWords(settings["numPracticeWords"])
+        wordsToPractice = [val for val in wordsToPractice for _ in range(3)]
+        wordsToPractice = shuffleList(wordsToPractice)
+        wordCount = len(wordsToPractice)
+        i = 0
+        correct = 0
+        wrong = 0
         for word in wordsToPractice:
-            clearScreen()
+            i += 1
             vWord = vocab[word]
-            adjustedScore = adjustScoreBasedOnTime(vocab[word])
+            cw = (correct + wrong)
+            if cw:
+                accuracy = int((correct / cw) * 100)
+            else:
+                accuracy = 'N/A'
+            clearScreen()
             printBorder()
             if settings["practiceMode"] == "random":
                 game = random.choice(
                     ["multiple choice", "multiple choice", "true/false"])  # Bigger chance for multiple choice
             else:
                 game = settings["practiceMode"]
+
             if game == "multiple choice":
-                printCentered("Multiple Choice")
-                printLineSeperator()
+                printCentered(f"Multiple Choice - {i}/{wordCount}")
+                printCentered(
+                    f"C:{correct} W:{wrong} Acc:{accuracy}%")
             elif game == "true/false":
-                printCentered("True/False")
-                printLineSeperator()
+                printCentered(f"True/False - {i}/{wordCount}")
+                printCentered(
+                    f"C:{correct} W:{wrong} Acc:{accuracy}%")
+
+            printLineSeperator()
+            printCentered("Press enter if you remember.")
+            printCentered("Press 1 if you don't.")
+            printLineSeperator()
+            if game == "true/false":
                 printCol_2("1. True", "2. False")
                 printSpaceSeperator()
             printCentered("0. Exit.")
@@ -375,6 +395,7 @@ def practice():
             color = getScoredColor(vocab[word]) + \
                 formatting['bg'][settings['bgColor']]
             if settings['showScore']:
+                adjustedScore = adjustScoreBasedOnTime(vocab[word])
                 printCentered(
                     f"{formatting['bold']}{color}{word} {formatting['reset']}{formatting['fg'][settings['fgColor']]}{formatting['bg'][settings['bgColor']]}({adjustedScore})")
             else:
@@ -384,72 +405,83 @@ def practice():
             printBorder()
 
             # Wait for input if the word is not new, so we don't give hints.
-            if adjustedScore >= int(settings["maxScore"] / 4):
-                poop = input()
-                if poop == '0':
-                    return
-            else:
-                print("")
-
-            printBorder()
-            tf_correctChoice = "1"
-            if game == "multiple choice":
-                answers = [vWord['word']]
-                answers.extend(random.sample(tWords, 3))
-                answers = shuffleList(answers)
-                for i in range(len(answers)):
-                    printCentered(
-                        f"{formatting['bold']}{i + 1}. {answers[i]}")
-            elif game == "true/false":
-                tf_correctChoice = random.choice(["1", "2"])
-                text = ""
-                if tf_correctChoice == "1":
-                    text = f"{word} = {vWord['word']}"
-                else:
-                    while True:
-                        tWord = random.choice(tWords)
-                        if tWord != vWord['word']:
-                            text = f"{word} = {tWord}"
-                            break
-                printCentered(
-                    f"{formatting['bold']}{text}")
-
-            printBorder()
-            answer = input(': ')
-            if answer == '0':
-                return
-
+            waitIn = input()
+            canRemember = True
             isGoodAnswer = False
-            if game == "multiple choice":
-                isGoodAnswer = answer and answers[int(
-                    answer) - 1] == vWord['word']
-            elif game == "true/false":
-                isGoodAnswer = answer == tf_correctChoice
-                if isGoodAnswer and tf_correctChoice == "2":
-                    clearScreen()
-                    printBorder()
-                    printCentered(f"{formatting['fg']['green']}Correct!")
-                    printCentered(f"The real word for {formatting['fg']['white']}{formatting['bg'][settings['bgColor']]}{formatting['bold']}'{word}'{formatting['reset']}{formatting['fg'][settings['fgColor']]}{formatting['bg'][settings['bgColor']]} is {formatting['fg']['white']}{formatting['bg'][settings['bgColor']]}{formatting['bold']}'{vWord['word']}'{formatting['reset']}{formatting['fg'][settings['fgColor']]}{formatting['bg'][settings['bgColor']]}.")
-                    printBorder()
-                    input()
+            if waitIn == '0':
+                return
+            elif waitIn == '1':
+                canRemember = False
+            printBorder()
+            if canRemember:
+                tf_correctChoice = "1"
+                if game == "multiple choice":
+                    answers = [vWord['word']]
+                    answers.extend(random.sample(tWords, 3))
+                    answers = shuffleList(answers)
+                    for aI in range(len(answers)):
+                        printCentered(
+                            f"{formatting['bold']}{aI + 1}. {answers[aI]}")
+                elif game == "true/false":
+                    tf_correctChoice = random.choice(["1", "2"])
+                    text = ""
+                    if tf_correctChoice == "1":
+                        text = f"{word} = {vWord['word']}"
+                    else:
+                        while True:
+                            tWord = random.choice(tWords)
+                            if tWord != vWord['word']:
+                                text = f"{word} = {tWord}"
+                                break
+                    printCentered(
+                        f"{formatting['bold']}{text}")
+
+                printBorder()
+                answer = input(': ')
+                if answer == '0':
+                    return
+                if game == "multiple choice":
+                    isGoodAnswer = answer and answers[int(
+                        answer) - 1] == vWord['word']
+                elif game == "true/false":
+                    isGoodAnswer = answer == tf_correctChoice
+                    if isGoodAnswer and tf_correctChoice == "2":
+                        clearScreen()
+                        printBorder()
+                        printCentered(f"{formatting['fg']['green']}Correct!")
+                        printCentered(f"The real word for {formatting['fg']['white']}{formatting['bg'][settings['bgColor']]}{formatting['bold']}'{word}'{formatting['reset']}{formatting['fg'][settings['fgColor']]}{formatting['bg'][settings['bgColor']]} is {formatting['fg']['white']}{formatting['bg'][settings['bgColor']]}{formatting['bold']}'{vWord['word']}'{formatting['reset']}{formatting['fg'][settings['fgColor']]}{formatting['bg'][settings['bgColor']]}.")
+                        printBorder()
+                        input()
 
             if isGoodAnswer:
                 vWord['streak'] += 1
                 vWord['score'] += 1
+                correct += 1
             else:
                 vWord['streak'] = 0
                 vWord['score'] *= 0.7
                 vWord['score'] = int(vWord['score'])
+                wrong += 1
                 clearScreen()
                 printBorder()
-                printCentered(
-                    f"{formatting['fg']['red']}Wrong!{formatting['reset']}")
                 printCentered(f"{formatting['fg']['red']}The word for {formatting['fg']['white']}{formatting['bold']}'{word}'{formatting['reset']}{formatting['fg']['red']}{formatting['bg'][settings['bgColor']]} is {formatting['fg']['white']}{formatting['bold']}'{vWord['word']}'{formatting['fg']['red']}.")
                 printBorder()
                 input()
             vWord["score"] = adjustScoreBasedOnTime(vWord)
             vWord['lastPracticed'] = time.time()
             saveVocab()
+        clearScreen()
+        printBorder()
+        printCentered(f"{formatting['fg']['green']}Practice Complete!")
+        printCentered(f"{correct} correct, {wrong} wrong.")
+        cw = (correct + wrong)
+        if cw:
+            accuracy = int((correct / cw) * 100)
+        else:
+            accuracy = 'N/A'
+        printCentered(f"{accuracy}% accuracy.")
+        printBorder()
+        input()
 
 
 def resetStats():
