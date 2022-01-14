@@ -715,6 +715,7 @@ def main():
             printBorder()
             os.system("git pull")
             os.system(sys.executable + " " + __file__)
+            exit()
         elif choice == '0':
             exit()
         else:
