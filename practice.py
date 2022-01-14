@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import time
 import random
@@ -82,7 +83,7 @@ def loadSettings():
             "timeDecayRatio": 0.3,
             "screenWidth": 65,
             "numPracticeWords": 8,
-            "maxScore": 20,
+            "maxScore": 15,
             "practiceMode": "random",
             "bgColor": "black",
             "fgColor": "white",
@@ -238,7 +239,23 @@ def getScoredColor(vocabWord):
 
 def sortVocab(reverse=False):
     global vocab
-    return sorted(vocab, key=lambda k: adjustScoreBasedOnTime(vocab[k]), reverse=reverse)
+    sortedV = sorted(vocab, key=lambda k: adjustScoreBasedOnTime(
+        vocab[k]), reverse=reverse)
+    removedFavorites = []
+    for i in range(len(sortedV)):
+        if vocab[sortedV[i]]['isFavorite']:
+            removedFavorites.append(sortedV[i])
+    for i in range(len(removedFavorites)):
+        sortedV.remove(removedFavorites[i])
+
+    if reverse:
+        sortedV.reverse()
+        sortedV.extend(removedFavorites)
+        sortedV.reverse()
+    else:
+        sortedV.extend(removedFavorites)
+
+    return sortedV
 
 
 def shuffleList(l):
@@ -305,8 +322,9 @@ def editWords():
         printLineSeperator()
         printCentered("Press enter to select a word.")
         printSpaceSeperator()
-        printCol_2("1. Edit word", "2. Edit translation")
-        printCol_2("3. Toggle Favorite", "4. Remove word")
+        printCol_2("1. Add words", "2. Remove word")
+        printCol_2("3. Edit word", "4. Edit translation")
+        printCol_2("5. Toggle Favorite", "")
         printSpaceSeperator()
         printCentered("0. Exit")
         printBorder()
@@ -314,6 +332,15 @@ def editWords():
         if opt == '0':
             return
         elif opt == '1':
+            addWords()
+            sortedVocab = sortVocab()
+            selectLine = 0
+        elif opt == '2':
+            del vocab[sortedVocab[selectLine]]
+            saveVocab()
+            sortedVocab = sortVocab()
+            selectLine -= 1
+        elif opt == '3':
             newWord = input(f'{sortedVocab[selectLine]} > ')
             if newWord == '0':
                 continue
@@ -321,23 +348,19 @@ def editWords():
             del vocab[sortedVocab[selectLine]]
             saveVocab()
             sortedVocab = sortVocab()
-        elif opt == '2':
+        elif opt == '4':
             newTranslation = input(f'{sortedVocab[selectLine]} = ')
             if newTranslation == '0':
                 continue
             vocab[sortedVocab[selectLine]]['word'] = newTranslation
             saveVocab()
             sortedVocab = sortVocab()
-        elif opt == '3':
+        elif opt == '5':
             vocab[sortedVocab[selectLine]
                   ]['isFavorite'] = not vocab[sortedVocab[selectLine]]['isFavorite']
+            selectLine += 1
             saveVocab()
             sortedVocab = sortVocab()
-        elif opt == '4':
-            del vocab[sortedVocab[selectLine]]
-            saveVocab()
-            sortedVocab = sortVocab()
-            selectLine -= 1
         else:
             selectLine += 1
 
@@ -360,6 +383,8 @@ def practice():
         for word in wordsToPractice:
             i += 1
             vWord = vocab[word]
+            vWord["score"] = adjustScoreBasedOnTime(vWord)
+            vWord['lastPracticed'] = time.time()
             cw = (correct + wrong)
             if cw:
                 accuracy = int((correct / cw) * 100)
@@ -446,7 +471,6 @@ def practice():
                 elif game == "true/false":
                     isGoodAnswer = answer == tf_correctChoice
                     if isGoodAnswer and tf_correctChoice == "2":
-                        clearScreen()
                         printBorder()
                         printCentered(f"{formatting['fg']['green']}Correct!")
                         printCentered(f"The real word for {formatting['fg']['white']}{formatting['bg'][settings['bgColor']]}{formatting['bold']}'{word}'{formatting['reset']}{formatting['fg'][settings['fgColor']]}{formatting['bg'][settings['bgColor']]} is {formatting['fg']['white']}{formatting['bg'][settings['bgColor']]}{formatting['bold']}'{vWord['word']}'{formatting['reset']}{formatting['fg'][settings['fgColor']]}{formatting['bg'][settings['bgColor']]}.")
@@ -462,13 +486,10 @@ def practice():
                 vWord['score'] *= 0.7
                 vWord['score'] = int(vWord['score'])
                 wrong += 1
-                clearScreen()
                 printBorder()
                 printCentered(f"{formatting['fg']['red']}The word for {formatting['fg']['white']}{formatting['bold']}'{word}'{formatting['reset']}{formatting['fg']['red']}{formatting['bg'][settings['bgColor']]} is {formatting['fg']['white']}{formatting['bold']}'{vWord['word']}'{formatting['fg']['red']}.")
                 printBorder()
                 input()
-            vWord["score"] = adjustScoreBasedOnTime(vWord)
-            vWord['lastPracticed'] = time.time()
             saveVocab()
         clearScreen()
         printBorder()
@@ -508,14 +529,12 @@ def settignsMenu():
         printCentered(f"1. Practice Mode ({settings['practiceMode']})")
         printCentered(f"2. Practice Count ({settings['numPracticeWords']})")
         printCentered(f"3. Max Score ({settings['maxScore']})")
-        printCentered(f"4. Show Score ({settings['showScore']})")
-        printCentered(f"5. Time Decay ({settings['timeDecayRatio']})")
-        printCentered(f"6. Reset Stats")
-        printCentered(f"7. BG Color ({settings['bgColor']})")
-        printCentered(f"8. FG Color ({settings['fgColor']})")
-        printCentered(f"9. Border Color ({settings['borderColor']})")
-        printCentered(f"10. Seperator Color ({settings['seperatorColor']})")
-        printCentered(f"11. Screen Width ({settings['screenWidth']})")
+        printCentered(f"4. Time Decay ({settings['timeDecayRatio']})")
+        printCentered(f"5. BG Color ({settings['bgColor']})")
+        printCentered(f"6. FG Color ({settings['fgColor']})")
+        printCentered(f"7. Border Color ({settings['borderColor']})")
+        printCentered(f"8. Seperator Color ({settings['seperatorColor']})")
+        printCentered(f"9. Screen Width ({settings['screenWidth']})")
         printCentered("0. Exit")
         printBorder()
         choice = input(': ')
@@ -571,23 +590,6 @@ def settignsMenu():
         elif choice == '4':
             clearScreen()
             printBorder()
-            printCentered(f"Show Score: {settings['showScore']}")
-            printLineSeperator()
-            printCol_2("1. On", "2. Off")
-            printSpaceSeperator()
-            printCentered("0. Exit")
-            printBorder()
-            choice = input(': ')
-            if choice == '0':
-                continue
-            elif choice == '1':
-                settings["showScore"] = True
-            elif choice == '2':
-                settings["showScore"] = False
-            saveSettings()
-        elif choice == '5':
-            clearScreen()
-            printBorder()
             printCentered(f"Time Decay: {settings['timeDecayRatio']}")
             printLineSeperator()
             printCentered("0. Exit")
@@ -604,14 +606,7 @@ def settignsMenu():
                 saveSettings()
             except Exception:
                 continue
-        elif choice == '6':
-            resetStats()
-            clearScreen()
-            printBorder()
-            printCentered("Stats Reset!")
-            printBorder()
-            input()
-        elif choice == '7':
+        elif choice == '5':
             clearScreen()
             printBorder()
             printCentered(
@@ -625,7 +620,7 @@ def settignsMenu():
             elif choice in formatting['bg']:
                 settings["bgColor"] = choice
             saveSettings()
-        elif choice == '8':
+        elif choice == '6':
             clearScreen()
             printBorder()
             printCentered(
@@ -639,7 +634,7 @@ def settignsMenu():
             elif choice in formatting['fg']:
                 settings["fgColor"] = choice
             saveSettings()
-        elif choice == '9':
+        elif choice == '7':
             clearScreen()
             printBorder()
             printCentered(
@@ -653,7 +648,7 @@ def settignsMenu():
             elif choice in formatting['fg']:
                 settings["borderColor"] = choice
             saveSettings()
-        elif choice == '10':
+        elif choice == '8':
             clearScreen()
             printBorder()
             printCentered(
@@ -667,7 +662,7 @@ def settignsMenu():
             elif choice in formatting['fg']:
                 settings["seperatorColor"] = choice
             saveSettings()
-        elif choice == '11':
+        elif choice == '9':
             clearScreen()
             printBorder()
             printCentered(
@@ -693,24 +688,33 @@ def main():
         printLineSeperator()
         printCentered("Let's burn some vocab into your brain!")
         printLineSeperator()
-        printCol_2("1. Add words", "2. Edit List")
-        printCol_2("3. Practice", "4. Toggle Translation")
-        printCol_2("5. Settings", "")
+        printCol_2("1. Practice", "2. Edit List")
+        printCol_2("3. Toggle Translation", "4. Toggle Score")
+        printCol_2("5. Settings", "6. Update")
         printSpaceSeperator()
         printCentered("0. Exit.")
         printBorder()
         choice = input(":")
         if choice == '1':
-            addWords()
+            practice()
         elif choice == '2':
             editWords()
         elif choice == '3':
-            practice()
-        elif choice == '4':
             settings["showTranslations"] = not settings["showTranslations"]
+            saveSettings()
+        elif choice == '4':
+            settings["showScore"] = not settings["showScore"]
             saveSettings()
         elif choice == '5':
             settignsMenu()
+        elif choice == '6':
+            # do git pull and restart script
+            clearScreen()
+            printBorder()
+            printCentered("Updating...")
+            printBorder()
+            os.system("git pull")
+            os.system(sys.executable + " " + __file__)
         elif choice == '0':
             exit()
         else:
