@@ -368,14 +368,18 @@ def editWords():
             selectLine = 0
 
 
-def practice():
+def practice(practiceAll=False):
     global vocab
     global settings
     tWords = [vocab[word]["word"] for word in vocab]
     while True:
-        wordsToPractice = getPracticeWords(settings["numPracticeWords"])
-        wordsToPractice = [val for val in wordsToPractice for _ in range(3)]
-        wordsToPractice = shuffleList(wordsToPractice)
+        if practiceAll:
+            wordsToPractice = tWords
+        else:
+            wordsToPractice = getPracticeWords(settings["numPracticeWords"])
+            wordsToPractice = [
+                val for val in wordsToPractice for _ in range(3)]
+            wordsToPractice = shuffleList(wordsToPractice)
         wordCount = len(wordsToPractice)
         i = 0
         correct = 0
@@ -501,8 +505,13 @@ def practice():
         else:
             accuracy = 'N/A'
         printCentered(f"{accuracy}% accuracy.")
+        printLineSeperator()
+        printCentered("Press enter to practice again.")
+        printCentered("Press 0 to exit.")
         printBorder()
-        input()
+        opt = input()
+        if opt == '0':
+            return
 
 
 def resetStats():
@@ -688,26 +697,29 @@ def main():
         printLineSeperator()
         printCentered("Let's burn some vocab into your brain!")
         printLineSeperator()
-        printCol_2("1. Practice", "2. Edit List")
-        printCol_2("3. Toggle Translation", "4. Toggle Score")
-        printCol_2("5. Settings", "6. Update")
+        printCol_2("1. Practice", "2. Practice All")
+        printCol_2("3. Edit List", "4. Toggle Translation")
+        printCol_2("5. Toggle Score", "6. Settings")
+        printCol_2("7. Update", "")
         printSpaceSeperator()
         printCentered("0. Exit.")
         printBorder()
         choice = input(":")
         if choice == '1':
             practice()
-        elif choice == '2':
-            editWords()
+        if choice == '2':
+            practice(True)
         elif choice == '3':
+            editWords()
+        elif choice == '4':
             settings["showTranslations"] = not settings["showTranslations"]
             saveSettings()
-        elif choice == '4':
+        elif choice == '5':
             settings["showScore"] = not settings["showScore"]
             saveSettings()
-        elif choice == '5':
-            settignsMenu()
         elif choice == '6':
+            settignsMenu()
+        elif choice == '7':
             # do git pull and restart script
             clearScreen()
             printBorder()
