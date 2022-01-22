@@ -75,15 +75,15 @@ def saveVocab():
 
 def loadSettings():
     global settings
-    settingVersion = 2
+    settingVersion = 3
     if not os.path.exists('settings.json'):
         print('Settings not found. Creating new one...')
         settings = {
             "settingVersion": settingVersion,
-            "timeDecayRatio": 0.3,
             "screenWidth": 65,
             "numPracticeWords": 8,
             "maxScore": 15,
+            "maxStreak": 60,
             "practiceMode": "random",
             "bgColor": "black",
             "fgColor": "white",
@@ -211,9 +211,16 @@ def printWordList(showTranslations=True, selectLine=-1, reverse=False):
 
 def adjustScoreBasedOnTime(vWord):
     global settings
+    scoreDepletionRate = 1
+    if vWord['streak'] > 0:
+        if vWord['streak'] >= settings['maxStreak']:
+            return settings['score']
+        scoreDepletionRate = vWord['streak'] / settings['maxStreak']
+        scoreDepletionRate = 1 - scoreDepletionRate
+
     nScore = vWord['score'] - \
         int((((time.time() - vWord['lastPracticed']) /
-            3600) / 2) * settings["timeDecayRatio"])
+            3600) / 2) * scoreDepletionRate)
     if nScore < 0:
         nScore = 0
     return nScore
@@ -538,7 +545,7 @@ def settignsMenu():
         printCentered(f"1. Practice Mode ({settings['practiceMode']})")
         printCentered(f"2. Practice Count ({settings['numPracticeWords']})")
         printCentered(f"3. Max Score ({settings['maxScore']})")
-        printCentered(f"4. Time Decay ({settings['timeDecayRatio']})")
+        printCentered(f"4. Max Streak ({settings['maxStreak']})")
         printCentered(f"5. BG Color ({settings['bgColor']})")
         printCentered(f"6. FG Color ({settings['fgColor']})")
         printCentered(f"7. Border Color ({settings['borderColor']})")
@@ -599,7 +606,7 @@ def settignsMenu():
         elif choice == '4':
             clearScreen()
             printBorder()
-            printCentered(f"Time Decay: {settings['timeDecayRatio']}")
+            printCentered(f"Max Streak: {settings['maxStreak']}")
             printLineSeperator()
             printCentered("0. Exit")
             printBorder()
@@ -607,11 +614,9 @@ def settignsMenu():
             try:
                 if choice == '0':
                     continue
-                settings["timeDecayRatio"] = float(choice)
-                if settings["timeDecayRatio"] < 0:
-                    settings["timeDecayRatio"] = 0
-                if settings["timeDecayRatio"] > 1:
-                    settings["timeDecayRatio"] = 1
+                settings["maxStreak"] = float(choice)
+                if settings["maxStreak"] < settings['maxScore']:
+                    settings["maxStreak"] = settings['maxScore']
                 saveSettings()
             except Exception:
                 continue
