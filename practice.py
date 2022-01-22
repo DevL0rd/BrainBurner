@@ -214,7 +214,7 @@ def adjustScoreBasedOnTime(vWord):
     scoreDepletionRate = 1
     if vWord['streak'] > 0:
         if vWord['streak'] >= settings['maxStreak']:
-            return settings['score']
+            return vWord['score']
         scoreDepletionRate = vWord['streak'] / settings['maxStreak']
         scoreDepletionRate = 1 - scoreDepletionRate
 
@@ -614,7 +614,7 @@ def settignsMenu():
             try:
                 if choice == '0':
                     continue
-                settings["maxStreak"] = float(choice)
+                settings["maxStreak"] = int(choice)
                 if settings["maxStreak"] < settings['maxScore']:
                     settings["maxStreak"] = settings['maxScore']
                 saveSettings()
