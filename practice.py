@@ -83,7 +83,7 @@ def loadSettings():
             "screenWidth": 65,
             "numPracticeWords": 8,
             "maxScore": 15,
-            "maxStreak": 60,
+            "maxStreak": 35,
             "practiceMode": "random",
             "bgColor": "black",
             "fgColor": "white",
