@@ -276,6 +276,8 @@ def getPracticeWords(num):
     global vocab
     global settings
     sortedVocab = sortVocab(reverse=True)
+    print(sortedVocab)
+    input()
     wordsToPractice = []
     i = 0
     while len(wordsToPractice) < num and i < len(sortedVocab):
