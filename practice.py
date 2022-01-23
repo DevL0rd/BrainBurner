@@ -276,14 +276,12 @@ def getPracticeWords(num):
     global vocab
     global settings
     sortedVocab = sortVocab(reverse=True)
-    print(sortedVocab)
-    input()
     wordsToPractice = []
     i = 0
     while len(wordsToPractice) < num and i < len(sortedVocab):
         word = sortedVocab[i]
         adjustedScore = adjustScoreBasedOnTime(vocab[word])
-        if adjustedScore > 0 and adjustedScore < settings["maxScore"]:
+        if adjustedScore < settings["maxScore"]:
             wordsToPractice.append(word)
         i += 1
     ammountLeft = num - len(wordsToPractice)
