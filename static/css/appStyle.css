@@ -1,0 +1,49 @@
+.vocabcard {
+    /* A sleep dark themed card with subtle trapsnparency */
+    background-color: #1a1a1a;
+    border: 1px solid #1a1a1a;
+    border-radius: 15px;
+    box-shadow: 0 0 5px 0 #1a1a1a;
+    color: #ffffff;
+    font-size: 1.2em;
+    margin: 10px;
+    padding: 10px;
+    text-align: center;
+    width: 300px;
+}
+
+.nativeText {
+    /* The native text of the word */
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.foreignText {
+    /* The foreign text of the word */
+    font-size: 1.2em;
+    font-style: italic;
+}
+
+.transliteration {
+    /* The transliteration of the word */
+    font-size: 1.em;
+    font-style: italic;
+}
+
+/* There will be 3 information pills to show type, score, and toggle favorite */
+.infoPill {
+    /* The info pill */
+    background-color: #313131;
+    border: 1px solid #1a1a1a;
+    border-radius: 5px;
+    box-shadow: 0 0 5px 0 #1a1a1a;
+    color: #ffffff;
+    font-size: 1.2em;
+    margin: 10px;
+    padding: 2px;
+    text-align: center;
+}
+
+.emoji {
+    font-size: 5em;
+}
