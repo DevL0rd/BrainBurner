@@ -148,15 +148,15 @@ def measureTextLength(text):
     return len(textCopy)
 
 
-def printCentered(text):
+def printCentered(text, spaceChar=' '):
     global settings
     length = measureTextLength(text)
     spaceCount = int((settings["screenWidth"] - length - 2) / 2)
-    spacing = " " * spaceCount
+    spacing = spaceChar * spaceCount
     text = formatting['fg'][settings['borderColor']] + formatting['bg'][settings['bgColor']] + "|" + formatting['fg'][settings['fgColor']] + formatting['bg'][settings['bgColor']
                                                                                                                                                               ] + spacing + text + formatting['reset'] + formatting["bg"][settings["bgColor"]] + spacing
     if measureTextLength(text) != settings["screenWidth"] - 1:
-        text += ' '
+        text += spaceChar
     text = text + formatting['fg'][settings['borderColor']] + \
         formatting['bg'][settings['bgColor']] + "|" + formatting['reset']
     print(text)
@@ -201,9 +201,7 @@ def printWordList(showTranslations=True, selectLine=-1, reverse=False):
     i = 0
     for category in wordsByCategory:
         formatString = f"{formatting['fg'][settings['fgColor']]}{formatting['bg'][settings['bgColor']]}{formatting['bold']}"
-        printLineSeperator()
-        printCentered(formatString + "[  " + category.upper() + "  ]" + formatting['reset'])
-        printLineSeperator()
+        printCentered(formatString + "[  " + category.upper() + "  ]" + formatting['reset'], '-')
         for word in wordsByCategory[category]:
             bg = formatting['bg'][settings['bgColor']]
             fg = formatting['fg'][settings['fgColor']]
@@ -492,6 +490,9 @@ def practice(practiceAll=False):
             printBorder()
             if canRemember:
                 tf_correctChoice = "1"
+                categoryWords = [vocab[word]['word'] for word in vocab if vocab[word]['category'] == vWord['category']]
+                categoryWords.remove(vWord['word'])
+                nonCategoryWords = [vocab[word]['word'] for word in vocab if vocab[word]['category'] != vWord['category']]
                 if game == "multiple choice":
                     # old algo
                     # answers = [vWord['word']]
@@ -500,15 +501,11 @@ def practice(practiceAll=False):
 
                     # give 4 answers, removing the current one to prevent duplicates, start with the current one, add matching category words shuffled and if not enough add random words
                     answers = [vWord['word']]
-                    categoryWords = [word for word in vocab if vocab[word]['category'] == vWord['category']]
-                    categoryWords.remove(word)
-                    answers.extend(random.sample(categoryWords, 3))
+                    answers = set(answers)
+                    answers.update(random.sample(categoryWords, min(3, len(categoryWords)))) # add category words if there are any
                     if len(answers) < 4:
-                        # possible answers not including the category words and the current word
-                        possibleAnswers = [word for word in vocab if vocab[word]['category'] != vWord['category']]
-                        possibleAnswers.remove(word)
-                        answers.extend(random.sample(possibleAnswers, 4 - len(answers)))
-                    answers = shuffleList(answers)
+                        answers.update(random.sample(nonCategoryWords, 4 - len(answers))) # add random words if not enough
+                    answers = shuffleList(list(answers))
                     for aI in range(len(answers)):
                         printCentered(
                             f"{formatting['bold']}{aI + 1}. {answers[aI]}")
@@ -518,13 +515,10 @@ def practice(practiceAll=False):
                     if tf_correctChoice == "1":
                         text = f"{word} = {vWord['word']}"
                     else:
-                        while True:
-                            #random choice of words in same category
-                            tWord = random.choice([word for word in vocab if vocab[word]['category'] == vWord['category']])
-                            if tWord != vWord['word']:
-                                #random choice of words not in same category
-                                text = f"{word} = {tWord}"
-                                break
+                        wrongAnswer = random.choice(categoryWords)
+                        if not wrongAnswer:
+                            wrongAnswer = random.choice(nonCategoryWords)
+                        text = f"{word} = {wrongAnswer}"
                     printCentered(
                         f"{formatting['bold']}{text}")
 

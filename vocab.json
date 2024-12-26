@@ -1,6 +1,6 @@
 {
     "bplae wa arai": {
-        "category": "phrase",
+        "category": "phrases",
         "isFavorite": false,
         "lastPracticed": 1735155004.5119827,
         "score": 16,
@@ -8,7 +8,7 @@
         "word": "what does that mean"
     },
     "bpra tap jai": {
-        "category": "adjective",
+        "category": "adjectives",
         "isFavorite": false,
         "lastPracticed": 1735155271.5216467,
         "score": 16,
@@ -16,7 +16,7 @@
         "word": "impressive"
     },
     "haang": {
-        "category": "noun",
+        "category": "nouns",
         "isFavorite": false,
         "lastPracticed": 1735155203.5248563,
         "score": 16,
@@ -24,7 +24,7 @@
         "word": "mall"
     },
     "jam bpen tong": {
-        "category": "adjective",
+        "category": "adjectives",
         "isFavorite": false,
         "lastPracticed": 1735154844.7028675,
         "score": 16,
@@ -32,7 +32,7 @@
         "word": "neccisary"
     },
     "kit top tuan": {
-        "category": "verb",
+        "category": "verbs",
         "isFavorite": false,
         "lastPracticed": 1735154971.882007,
         "score": 16,
@@ -40,15 +40,15 @@
         "word": "review"
     },
     "mai na chai": {
-        "category": "phrase",
+        "category": "phrases",
         "isFavorite": false,
-        "lastPracticed": 1735155205.8718395,
-        "score": 15,
-        "streak": 9,
+        "lastPracticed": 1735213858.1818125,
+        "score": 10,
+        "streak": 10,
         "word": "probably not"
     },
     "mai na cheua": {
-        "category": "adjective",
+        "category": "adjectives",
         "isFavorite": false,
         "lastPracticed": 1735154791.1193526,
         "score": 16,
@@ -56,7 +56,7 @@
         "word": "unbelievable"
     },
     "mai ngan gor": {
-        "category": "adverb",
+        "category": "adverbs",
         "isFavorite": false,
         "lastPracticed": 1735155104.851789,
         "score": 16,
@@ -64,7 +64,7 @@
         "word": "otherwise"
     },
     "naew nai": {
-        "category": "noun",
+        "category": "nouns",
         "isFavorite": false,
         "lastPracticed": 1735155618.0256155,
         "score": 11,
@@ -72,7 +72,7 @@
         "word": "type"
     },
     "nai than glahp gan": {
-        "category": "phrase",
+        "category": "phrases",
         "isFavorite": false,
         "lastPracticed": 1735155587.3890698,
         "score": 12,
@@ -80,15 +80,15 @@
         "word": "on the other hand"
     },
     "nak tong tieow": {
-        "category": "noun",
+        "category": "nouns",
         "isFavorite": false,
-        "lastPracticed": 1735209628.8626678,
-        "score": 9,
-        "streak": 16,
+        "lastPracticed": 1735213848.6327305,
+        "score": 10,
+        "streak": 17,
         "word": "tourist"
     },
     "pom gaw mai": {
-        "category": "phrase",
+        "category": "phrases",
         "isFavorite": false,
         "lastPracticed": 1735155615.017685,
         "score": 11,
@@ -96,15 +96,15 @@
         "word": "me either"
     },
     "rhong": {
-        "category": "noun",
+        "category": "nouns",
         "isFavorite": false,
-        "lastPracticed": 1735155625.4009764,
-        "score": 12,
-        "streak": 15,
+        "lastPracticed": 1735213750.533981,
+        "score": 9,
+        "streak": 16,
         "word": "building"
     },
     "rong nang": {
-        "category": "noun",
+        "category": "nouns",
         "isFavorite": false,
         "lastPracticed": 1735155628.0152078,
         "score": 10,
@@ -112,7 +112,7 @@
         "word": "theater"
     },
     "rot may": {
-        "category": "noun",
+        "category": "nouns",
         "isFavorite": false,
         "lastPracticed": 1735155595.1269705,
         "score": 11,
@@ -120,15 +120,15 @@
         "word": "bus"
     },
     "sa-yong kwan": {
-        "category": "noun",
+        "category": "nouns",
         "isFavorite": false,
-        "lastPracticed": 1735156099.31959,
-        "score": 12,
-        "streak": 12,
+        "lastPracticed": 1735213908.874032,
+        "score": 8,
+        "streak": 13,
         "word": "horror"
     },
     "sut sut": {
-        "category": "adjective",
+        "category": "adjectives",
         "isFavorite": false,
         "lastPracticed": 1735156522.9804657,
         "score": 8,
@@ -136,7 +136,7 @@
         "word": "super"
     },
     "wan aa-tit": {
-        "category": "day",
+        "category": "days",
         "isFavorite": false,
         "lastPracticed": 1735156498.874365,
         "score": 10,
@@ -144,7 +144,7 @@
         "word": "sunday"
     },
     "wan ang-kaan": {
-        "category": "day",
+        "category": "days",
         "isFavorite": false,
         "lastPracticed": 1735156510.1229148,
         "score": 12,
@@ -152,23 +152,23 @@
         "word": "tuesday"
     },
     "wan jan": {
-        "category": "day",
+        "category": "days",
         "isFavorite": false,
-        "lastPracticed": 1735206084.5220795,
-        "score": 9,
-        "streak": 13,
+        "lastPracticed": 1735213845.6365676,
+        "score": 11,
+        "streak": 15,
         "word": "monday"
     },
     "wan pa-rue-hat": {
-        "category": "day",
+        "category": "days",
         "isFavorite": false,
-        "lastPracticed": 1735206092.4395342,
-        "score": 9,
-        "streak": 13,
+        "lastPracticed": 1735213832.7036304,
+        "score": 11,
+        "streak": 15,
         "word": "thursday"
     },
     "wan puht": {
-        "category": "day",
+        "category": "days",
         "isFavorite": false,
         "lastPracticed": 1735156544.921899,
         "score": 12,
@@ -176,7 +176,7 @@
         "word": "wednesday"
     },
     "wan sao": {
-        "category": "day",
+        "category": "days",
         "isFavorite": false,
         "lastPracticed": 1735156553.077736,
         "score": 12,
@@ -184,7 +184,7 @@
         "word": "saturday"
     },
     "wong": {
-        "category": "noun",
+        "category": "nouns",
         "isFavorite": false,
         "lastPracticed": 1734807552.3360088,
         "score": 0,
@@ -192,7 +192,7 @@
         "word": "band"
     },
     "yang ngai gor tam": {
-        "category": "adverb",
+        "category": "adverbs",
         "isFavorite": false,
         "lastPracticed": 1734808699.334093,
         "score": 0,
