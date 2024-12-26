@@ -493,8 +493,21 @@ def practice(practiceAll=False):
             if canRemember:
                 tf_correctChoice = "1"
                 if game == "multiple choice":
+                    # old algo
+                    # answers = [vWord['word']]
+                    # answers.extend(random.sample(tWords, 3))
+                    # answers = shuffleList(answers)
+
+                    # give 4 answers, removing the current one to prevent duplicates, start with the current one, add matching category words shuffled and if not enough add random words
                     answers = [vWord['word']]
-                    answers.extend(random.sample(tWords, 3))
+                    categoryWords = [word for word in vocab if vocab[word]['category'] == vWord['category']]
+                    categoryWords.remove(word)
+                    answers.extend(random.sample(categoryWords, 3))
+                    if len(answers) < 4:
+                        # possible answers not including the category words and the current word
+                        possibleAnswers = [word for word in vocab if vocab[word]['category'] != vWord['category']]
+                        possibleAnswers.remove(word)
+                        answers.extend(random.sample(possibleAnswers, 4 - len(answers)))
                     answers = shuffleList(answers)
                     for aI in range(len(answers)):
                         printCentered(
@@ -506,8 +519,10 @@ def practice(practiceAll=False):
                         text = f"{word} = {vWord['word']}"
                     else:
                         while True:
-                            tWord = random.choice(tWords)
+                            #random choice of words in same category
+                            tWord = random.choice([word for word in vocab if vocab[word]['category'] == vWord['category']])
                             if tWord != vWord['word']:
+                                #random choice of words not in same category
                                 text = f"{word} = {tWord}"
                                 break
                     printCentered(
