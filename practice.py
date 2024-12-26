@@ -184,30 +184,50 @@ def printWordList(showTranslations=True, selectLine=-1, reverse=False):
     global vocab
     global settings
     printBorder()
+    sW = sortVocab(reverse)
+    wordsByCategory = {}
+    for word in sW:
+        category = vocab[word]['category']
+        if category not in wordsByCategory:
+            wordsByCategory[category] = []
+        wordsByCategory[category].append(word)
+
+    selectedWord = None
+    sortedWords = []
+    for category in wordsByCategory:
+        for word in wordsByCategory[category]:
+            sortedWords.append(word)
+
     i = 0
-    for word in sortVocab(reverse=reverse):
-        fg = formatting['fg'][settings['fgColor']]
-        bg = formatting['bg'][settings['bgColor']]
-        color = getScoredColor(vocab[word]) + bg
-        if selectLine == i:
-            fg = formatting['fg'][settings['highlightColorFG']]
-            bg = formatting['bg'][settings['highlightColorBG']]
-            color = fg + bg
+    for category in wordsByCategory:
+        formatString = f"{formatting['fg'][settings['fgColor']]}{formatting['bg'][settings['bgColor']]}{formatting['bold']}"
+        printLineSeperator()
+        printCentered(formatString + "[  " + category.upper() + "  ]" + formatting['reset'])
+        printLineSeperator()
+        for word in wordsByCategory[category]:
+            bg = formatting['bg'][settings['bgColor']]
+            fg = formatting['fg'][settings['fgColor']]
+            color = getScoredColor(vocab[word]) + bg
+            if selectLine == i:
+                fg = formatting['fg'][settings['highlightColorFG']]
+                bg = formatting['bg'][settings['highlightColorBG']]
+                color = fg + bg
+                selectedWord = word
 
-        text = f"{color}{word}"
-        if showTranslations:
-            text = f"{text} = {vocab[word]['word']}"
+            text = f"{color}{word}"
+            if showTranslations:
+                text = f"{text} = {vocab[word]['word']}"
 
-        if settings['showScore']:
-            adjustedScore = adjustScoreBasedOnTime(vocab[word])
-            text = f"{text}{formatting['reset']}{fg}{bg} ({adjustedScore})"
+            if settings['showScore']:
+                adjustedScore = adjustScoreBasedOnTime(vocab[word])
+                text = f"{text}{formatting['reset']}{fg}{bg} ({adjustedScore})"
 
-        if vocab[word]['isFavorite']:
-            text = f"{formatting['fg']['yellow']}{bg}★ {text} {formatting['fg']['yellow']}{bg}★"
+            if vocab[word]['isFavorite']:
+                text = f"{formatting['fg']['yellow']}{bg}★ {text} {formatting['fg']['yellow']}{bg}★"
 
-        printCentered(text)
-        i += 1
-
+            printCentered(text)
+            i += 1
+    return selectedWord
 
 def adjustScoreBasedOnTime(vWord):
     global settings
@@ -281,8 +301,7 @@ def getPracticeWords(num):
     while len(wordsToPractice) < num and i < len(sortedVocab):
         word = sortedVocab[i]
         adjustedScore = adjustScoreBasedOnTime(vocab[word])
-        # if less than max score and not practiced in last 2 minutes
-        if adjustedScore < settings["maxScore"] and time.time() - vocab[word]['lastPracticed'] > 120:
+        if adjustedScore < settings["maxScore"] and time.time() - vocab[word]['lastPracticed'] > 60 * 5: # 5 minutes
             wordsToPractice.append(word)
         i += 1
     ammountLeft = num - len(wordsToPractice)
@@ -290,6 +309,24 @@ def getPracticeWords(num):
         wordsToPractice.extend(sortedVocab[-ammountLeft:])
     return wordsToPractice
 
+def getCategory():
+    global settings
+    while True:
+        newCategory = input(f'Category: ').lower()
+        if newCategory == '0':
+            return '0'
+        elif newCategory == '':
+            continue
+        if newCategory not in settings['categories']:
+            printCentered(f"Category '{newCategory}' not found.")
+            printCentered("Would you like to add it? (y/n)")
+            choice = input(': ').lower()
+            if choice == 'y':
+                settings['categories'].append(newCategory)
+                saveSettings()
+            else:
+                continue
+        return newCategory
 
 def addWords():
     global vocab
@@ -308,23 +345,27 @@ def addWords():
             tWord = input(f'{word} = ')
             if tWord == '0':
                 continue
+            newCategory = getCategory()
+            if newCategory == '0':
+                continue
             vocab[word] = {
                 'word': tWord,
                 'streak': 0,
                 'lastPracticed': time.time(),
                 'score': 0,
-                'isFavorite': False
+                'isFavorite': False,
+                'category': newCategory
             }
             saveVocab()
 
 
 def editWords():
     global vocab
+    vocabKeys = list(vocab.keys())
     selectLine = 0
-    sortedVocab = sortVocab()
     while True:
         clearScreen()
-        printWordList(selectLine=selectLine)
+        selectedWord = printWordList(selectLine=selectLine)
         printLineSeperator()
         printCentered("Edit word list.")
         printLineSeperator()
@@ -341,38 +382,37 @@ def editWords():
             return
         elif opt == '1':
             addWords()
-            sortedVocab = sortVocab()
             selectLine = 0
         elif opt == '2':
-            del vocab[sortedVocab[selectLine]]
+            del vocab[selectedWord]
             saveVocab()
-            sortedVocab = sortVocab()
             selectLine -= 1
         elif opt == '3':
-            newWord = input(f'{sortedVocab[selectLine]} > ')
+            newWord = input(f'{selectedWord} > ')
             if newWord == '0':
                 continue
-            vocab[newWord] = vocab[sortedVocab[selectLine]]
-            del vocab[sortedVocab[selectLine]]
+            elif newWord == "":
+                newWord = selectedWord
+            newCategory = getCategory()
+            if newWord != selectedWord:
+                vocab[newWord] = vocab[selectedWord]
+                del vocab[selectedWord]
+            vocab[newWord]['category'] = newCategory
             saveVocab()
-            sortedVocab = sortVocab()
         elif opt == '4':
-            newTranslation = input(f'{sortedVocab[selectLine]} = ')
+            newTranslation = input(f'{selectedWord} = ')
             if newTranslation == '0':
                 continue
-            vocab[sortedVocab[selectLine]]['word'] = newTranslation
+            vocab[selectedWord]['word'] = newTranslation
             saveVocab()
-            sortedVocab = sortVocab()
         elif opt == '5':
-            vocab[sortedVocab[selectLine]
-                  ]['isFavorite'] = not vocab[sortedVocab[selectLine]]['isFavorite']
+            vocab[selectedWord]['isFavorite'] = not vocab[selectedWord]['isFavorite']
             selectLine += 1
             saveVocab()
-            sortedVocab = sortVocab()
         else:
             selectLine += 1
 
-        if selectLine < 0 or selectLine > len(sortedVocab) - 1:
+        if selectLine < 0 or selectLine > len(vocabKeys) - 1:
             selectLine = 0
 
 
