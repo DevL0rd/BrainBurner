@@ -12,5 +12,6 @@
     "seperatorColor": "darkBlue",
     "settingVersion": 3,
     "showScore": true,
-    "showTranslations": false
+    "showTranslations": false,
+    "openai_api_key": "sk-1234567890abcdef1234567890abcdef"
 }

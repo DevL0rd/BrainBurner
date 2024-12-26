@@ -281,7 +281,8 @@ def getPracticeWords(num):
     while len(wordsToPractice) < num and i < len(sortedVocab):
         word = sortedVocab[i]
         adjustedScore = adjustScoreBasedOnTime(vocab[word])
-        if adjustedScore < settings["maxScore"]:
+        # if less than max score and not practiced in last 2 minutes
+        if adjustedScore < settings["maxScore"] and time.time() - vocab[word]['lastPracticed'] > 120:
             wordsToPractice.append(word)
         i += 1
     ammountLeft = num - len(wordsToPractice)
@@ -381,7 +382,7 @@ def practice(practiceAll=False):
     tWords = [vocab[word]["word"] for word in vocab]
     while True:
         if practiceAll:
-            wordsToPractice = tWords
+            wordsToPractice = getPracticeWords(len(vocab))
         else:
             wordsToPractice = getPracticeWords(settings["numPracticeWords"])
             wordsToPractice = [
