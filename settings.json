@@ -1,0 +1,16 @@
+{
+    "bgColor": "black",
+    "borderColor": "blue",
+    "fgColor": "white",
+    "highlightColorBG": "lightGray",
+    "highlightColorFG": "blue",
+    "maxScore": 10,
+    "maxStreak": 35,
+    "numPracticeWords": 8,
+    "practiceMode": "random",
+    "screenWidth": 93,
+    "seperatorColor": "darkBlue",
+    "settingVersion": 3,
+    "showScore": true,
+    "showTranslations": false
+}
